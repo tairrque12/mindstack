@@ -69,10 +69,10 @@ export default function Home() {
     <div className="relative flex flex-col h-full overflow-hidden" style={{ background: '#080808' }}>
       <ParticleCanvas />
 
-      {/* Radial gradient overlay — vignette creates depth and focal point */}
+      {/* Radial vignette — depth + focal point */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 5,
-        background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(8,8,8,0.6) 100%)',
+        background: 'radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(8,8,8,0.5) 70%, rgba(8,8,8,0.85) 100%)',
       }} />
 
       {/* Content layer */}
@@ -96,9 +96,24 @@ export default function Home() {
           className="flex-1 flex flex-col items-center gap-6"
           style={{
             justifyContent: 'flex-start',
-            paddingTop: isActive ? 0 : 'calc(58dvh - 180px)',
+            paddingTop: isActive ? 0 : 'calc(58dvh - 200px)',
           }}
         >
+
+          {/* Headline — idle only */}
+          {!isActive && (
+            <div style={{
+              fontFamily: 'Syne, sans-serif',
+              fontWeight: 700,
+              fontSize: 24,
+              color: 'rgba(255,255,255,0.85)',
+              textAlign: 'center',
+              width: '100%',
+              maxWidth: 480,
+            }}>
+              What's on your mind?
+            </div>
+          )}
 
           {/* Input */}
           <div className="w-full transition-all duration-300" style={{ maxWidth: isActive ? '100%' : 480 }}>
@@ -106,7 +121,7 @@ export default function Home() {
               className="relative"
               style={{
                 background: 'rgba(255,255,255,0.06)',
-                border: '0.5px solid transparent',
+                border: '0.5px solid rgba(255,255,255,0.08)',
                 borderRadius: 12,
                 boxShadow: inputFocused
                   ? '0 0 0 1px rgba(245,166,35,0.4)'
@@ -123,7 +138,7 @@ export default function Home() {
                 onKeyDown={handleKeyDown}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
-                placeholder="What's on your mind?"
+                placeholder="Ask your brain anything..."
                 rows={isActive ? 2 : 3}
                 disabled={mode === 'thinking' || mode === 'streaming'}
                 className="home-input"

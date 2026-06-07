@@ -91,19 +91,19 @@ export default function ParticleCanvas() {
         }
       }
 
+      ctx.lineWidth = 0.5
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
           const dy = nodes[i].y - nodes[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < MAX_DISTANCE) {
-            const hubBoost = nodes[i].isHub || nodes[j].isHub ? 1.5 : 1
-            const alpha = (1 - dist / MAX_DISTANCE) * 0.25 * hubBoost
+          const distSq = dx * dx + dy * dy
+          if (distSq < MAX_DISTANCE * MAX_DISTANCE) {
+            const dist = Math.sqrt(distSq)
+            const alpha = (1 - dist / MAX_DISTANCE) * 0.15
             ctx.beginPath()
-            ctx.strokeStyle = `rgba(${AMBER}, ${alpha})`
-            ctx.lineWidth = nodes[i].isHub || nodes[j].isHub ? 0.7 : 0.5
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
+            ctx.strokeStyle = `rgba(${AMBER}, ${alpha})`
             ctx.stroke()
           }
         }
