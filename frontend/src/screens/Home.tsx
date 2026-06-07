@@ -81,7 +81,7 @@ export default function Home() {
         {/* Wordmark */}
         <div className="pt-14 pb-4">
           <span style={{
-            fontFamily: 'Syne, sans-serif', fontWeight: 800,
+            fontFamily: "'Clash Display', sans-serif", fontWeight: 800,
             fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.3em',
           }}>
             MINDSTACK
@@ -100,7 +100,7 @@ export default function Home() {
           {/* Headline — drops from above */}
           {!isActive && (
             <div style={{
-              fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36,
+              fontFamily: "'Clash Display', sans-serif", fontWeight: 800, fontSize: 36,
               color: 'rgba(255,255,255,0.85)', textAlign: 'center',
               width: '100%', maxWidth: 480,
               animation: 'dropDown 0.8s ease-out 0.2s both',
@@ -149,7 +149,7 @@ export default function Home() {
                   width: '100%', background: 'transparent',
                   border: 'none', outline: 'none',
                   padding: '18px 52px 18px 24px',
-                  fontFamily: 'Syne, sans-serif', fontSize: 16,
+                  fontFamily: "'Clash Display', sans-serif", fontSize: 16,
                   color: 'rgba(255,255,255,0.9)', resize: 'none',
                   lineHeight: 1.6, minHeight: 56,
                 }}
@@ -229,7 +229,7 @@ export default function Home() {
                   style={{
                     height: 36, padding: '0 16px',
                     background: '#F5A623', border: 'none', borderRadius: 20,
-                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontFamily: "'Clash Display', sans-serif", fontWeight: 700,
                     fontSize: 10, letterSpacing: '0.15em',
                     color: '#080808', cursor: 'pointer',
                   }}
@@ -242,7 +242,7 @@ export default function Home() {
                     height: 36, padding: '0 16px',
                     background: 'transparent',
                     border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
-                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontFamily: "'Clash Display', sans-serif", fontWeight: 700,
                     fontSize: 10, letterSpacing: '0.15em',
                     color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
                   }}
@@ -255,7 +255,7 @@ export default function Home() {
                     height: 36, padding: '0 16px',
                     background: 'transparent',
                     border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
-                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontFamily: "'Clash Display', sans-serif", fontWeight: 700,
                     fontSize: 10, letterSpacing: '0.15em',
                     color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
                   }}

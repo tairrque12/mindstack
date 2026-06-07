@@ -80,7 +80,7 @@ export default function Library() {
         >
           ←
         </button>
-        <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'rgba(255,255,255,0.9)' }}>
+        <span style={{ fontFamily: "'Clash Display', sans-serif", fontWeight: 700, fontSize: 16, color: 'rgba(255,255,255,0.9)' }}>
           YOUR BRAIN
         </span>
         <div style={{ marginLeft: 'auto', fontFamily: 'DM Mono, monospace', fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
