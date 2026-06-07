@@ -69,7 +69,7 @@ export default function Home() {
     <div className="relative flex flex-col h-full overflow-hidden" style={{ background: '#080808' }}>
       <ParticleCanvas />
 
-      {/* Radial vignette — depth + focal point */}
+      {/* Vignette */}
       <div style={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 5,
         background: 'radial-gradient(ellipse at 50% 50%, transparent 20%, rgba(8,8,8,0.5) 70%, rgba(8,8,8,0.85) 100%)',
@@ -78,45 +78,48 @@ export default function Home() {
       {/* Content layer */}
       <div className="relative z-10 flex flex-col h-full px-5">
 
-        {/* Wordmark — subtle */}
+        {/* Wordmark */}
         <div className="pt-14 pb-4">
           <span style={{
-            fontFamily: 'Syne, sans-serif',
-            fontWeight: 800,
-            fontSize: 11,
-            color: 'rgba(255,255,255,0.5)',
-            letterSpacing: '0.3em',
+            fontFamily: 'Syne, sans-serif', fontWeight: 800,
+            fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.3em',
           }}>
             MINDSTACK
           </span>
         </div>
 
-        {/* Center cluster — 58% from top in idle mode */}
+        {/* Center cluster */}
         <div
-          className="flex-1 flex flex-col items-center gap-6"
+          className="flex-1 flex flex-col items-center"
           style={{
             justifyContent: 'flex-start',
             paddingTop: isActive ? 0 : 'calc(58dvh - 200px)',
+            gap: 20,
           }}
         >
-
-          {/* Headline — idle only */}
+          {/* Headline — drops from above */}
           {!isActive && (
             <div style={{
-              fontFamily: 'Syne, sans-serif',
-              fontWeight: 700,
-              fontSize: 24,
-              color: 'rgba(255,255,255,0.85)',
-              textAlign: 'center',
-              width: '100%',
-              maxWidth: 480,
+              fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36,
+              color: 'rgba(255,255,255,0.85)', textAlign: 'center',
+              width: '100%', maxWidth: 480,
+              animation: 'dropDown 0.8s ease-out 0.2s both',
             }}>
               What's on your mind?
             </div>
           )}
 
-          {/* Input */}
-          <div className="w-full transition-all duration-300" style={{ maxWidth: isActive ? '100%' : 480 }}>
+          {/* Input + response + buttons — rises from below as one unit */}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: isActive ? '100%' : 480,
+              display: 'flex', flexDirection: 'column', gap: 20,
+              transition: 'max-width 0.3s ease-out',
+              animation: 'riseUp 0.8s ease-out 0.5s both',
+            }}
+          >
+            {/* Input */}
             <div
               className="relative"
               style={{
@@ -143,22 +146,17 @@ export default function Home() {
                 disabled={mode === 'thinking' || mode === 'streaming'}
                 className="home-input"
                 style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
+                  width: '100%', background: 'transparent',
+                  border: 'none', outline: 'none',
                   padding: '18px 52px 18px 24px',
-                  fontFamily: 'Syne, sans-serif',
-                  fontSize: 16,
-                  color: 'rgba(255,255,255,0.9)',
-                  resize: 'none',
-                  lineHeight: 1.6,
-                  minHeight: 56,
+                  fontFamily: 'Syne, sans-serif', fontSize: 16,
+                  color: 'rgba(255,255,255,0.9)', resize: 'none',
+                  lineHeight: 1.6, minHeight: 56,
                 }}
                 aria-label="Ask your brain"
               />
 
-              {/* Send arrow — appears on typing */}
+              {/* Send arrow */}
               <button
                 onClick={handleSubmit}
                 aria-label="Submit"
@@ -183,91 +181,90 @@ export default function Home() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Streaming response */}
-          {isActive && (
-            <div
-              className="w-full overflow-y-auto"
-              style={{ flex: 1, paddingBottom: 16 }}
-              aria-live="polite"
-              aria-label="Brain response"
-            >
-              {response && (
-                <div style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: 14, lineHeight: 1.8,
-                  color: 'rgba(255,255,255,0.85)',
-                  whiteSpace: 'pre-wrap',
-                }}>
-                  {response}
-                  {mode === 'streaming' && (
-                    <span style={{ color: '#F5A623', animation: 'blink 1s step-end infinite' }}>▋</span>
-                  )}
-                </div>
-              )}
-              {mode === 'done' && (
+            {/* Streaming response */}
+            {isActive && (
+              <div
+                className="w-full overflow-y-auto"
+                style={{ flex: 1, paddingBottom: 16 }}
+                aria-live="polite"
+                aria-label="Brain response"
+              >
+                {response && (
+                  <div style={{
+                    fontFamily: 'DM Mono, monospace', fontSize: 14,
+                    lineHeight: 1.8, color: 'rgba(255,255,255,0.85)',
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                    {response}
+                    {mode === 'streaming' && (
+                      <span style={{ color: '#F5A623', animation: 'blink 1s step-end infinite' }}>▋</span>
+                    )}
+                  </div>
+                )}
+                {mode === 'done' && (
+                  <button
+                    onClick={reset}
+                    style={{
+                      marginTop: 24, background: 'transparent',
+                      border: '0.5px solid rgba(255,255,255,0.15)',
+                      borderRadius: 8, padding: '10px 20px',
+                      fontFamily: 'DM Mono, monospace', fontSize: 12,
+                      color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    ASK ANOTHER
+                  </button>
+                )}
+                <div ref={responseRef} />
+              </div>
+            )}
+
+            {/* Action buttons — idle only */}
+            {!isActive && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10 }}>
                 <button
-                  onClick={reset}
+                  onClick={() => navigate('/add')}
                   style={{
-                    marginTop: 24, background: 'transparent',
-                    border: '0.5px solid rgba(255,255,255,0.15)',
-                    borderRadius: 8, padding: '10px 20px',
-                    fontFamily: 'DM Mono, monospace', fontSize: 12,
-                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-                    letterSpacing: '0.05em',
+                    height: 36, padding: '0 16px',
+                    background: '#F5A623', border: 'none', borderRadius: 20,
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontSize: 10, letterSpacing: '0.15em',
+                    color: '#080808', cursor: 'pointer',
                   }}
                 >
-                  ASK ANOTHER
+                  ADD
                 </button>
-              )}
-              <div ref={responseRef} />
-            </div>
-          )}
-
-          {/* Action buttons — idle only */}
-          {!isActive && (
-            <div className="flex justify-center" style={{ gap: 10 }}>
-              <button
-                onClick={() => navigate('/add')}
-                style={{
-                  height: 36, padding: '0 16px',
-                  background: '#F5A623', border: 'none', borderRadius: 20,
-                  fontFamily: 'Syne, sans-serif', fontWeight: 700,
-                  fontSize: 10, letterSpacing: '0.15em',
-                  color: '#080808', cursor: 'pointer',
-                }}
-              >
-                ADD
-              </button>
-              <button
-                onClick={() => navigate('/brain')}
-                style={{
-                  height: 36, padding: '0 16px',
-                  background: 'transparent',
-                  border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
-                  fontFamily: 'Syne, sans-serif', fontWeight: 700,
-                  fontSize: 10, letterSpacing: '0.15em',
-                  color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-                }}
-              >
-                VIEW BRAIN
-              </button>
-              <button
-                onClick={() => showToast('Coming soon')}
-                style={{
-                  height: 36, padding: '0 16px',
-                  background: 'transparent',
-                  border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
-                  fontFamily: 'Syne, sans-serif', fontWeight: 700,
-                  fontSize: 10, letterSpacing: '0.15em',
-                  color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-                }}
-              >
-                MIND MAP
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={() => navigate('/brain')}
+                  style={{
+                    height: 36, padding: '0 16px',
+                    background: 'transparent',
+                    border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontSize: 10, letterSpacing: '0.15em',
+                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                  }}
+                >
+                  VIEW BRAIN
+                </button>
+                <button
+                  onClick={() => showToast('Coming soon')}
+                  style={{
+                    height: 36, padding: '0 16px',
+                    background: 'transparent',
+                    border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 20,
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontSize: 10, letterSpacing: '0.15em',
+                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+                  }}
+                >
+                  MIND MAP
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Recent nodes — only when brain has content */}
@@ -315,8 +312,16 @@ export default function Home() {
 
       <style>{`
         .home-input::placeholder { color: rgba(255,255,255,0.2); }
+        @keyframes dropDown {
+          from { opacity: 0; transform: translateY(-40px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes riseUp {
+          from { opacity: 0; transform: translateY(60px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         @keyframes pulse { 0%,100% { opacity:0.4; transform:scale(0.9) } 50% { opacity:1; transform:scale(1.1) } }
-        @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
+        @keyframes blink  { 0%,100% { opacity:1 } 50% { opacity:0 } }
       `}</style>
     </div>
   )
