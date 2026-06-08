@@ -87,8 +87,13 @@ def ingest_node(
 
     slug = f"captures/{source_type}/{uuid4().hex}"
 
+    display_title = source_title
+    if not display_title and content.strip():
+        first_line = content.strip().split("\n", 1)[0]
+        display_title = first_line if len(first_line) <= 80 else f"{first_line[:77]}..."
+
     frontmatter: dict = {
-        "title": source_title or f"{source_type} capture",
+        "title": display_title or f"{source_type} capture",
         "source_type": source_type,
         "captured_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -137,4 +142,9 @@ def ingest_node(
         logger.error("gbrain put failed (rc=%d): %s", exc.returncode, exc.stderr)
         raise RuntimeError("Storage backend error — knowledge not saved") from exc
 
-    return {"slug": slug, "source_type": source_type}
+    return {
+        "slug": slug,
+        "source_type": source_type,
+        "title": frontmatter["title"],
+        "insight": metadata.get("insight"),
+    }
