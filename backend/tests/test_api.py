@@ -113,7 +113,25 @@ def test_get_nodes_success(client):
     data = resp.json()
     assert len(data["nodes"]) == 2
     assert data["nodes"][0]["slug"] == "captures/tweet/abc"
+    assert data["nodes"][0]["source_type"] == "tweet"
+    assert data["nodes"][1]["source_type"] == "book"
     assert data["nodes"][0]["title"] == "@garrytan tweet"
+
+
+def test_get_nodes_source_type_filter(client):
+    mock_output = (
+        "captures/tweet/abc\tconcept\t2026-06-07\t@garrytan tweet\n"
+        "captures/book/def\tconcept\t2026-06-06\tZero to One highlight\n"
+    )
+    with patch("app.main.subprocess.run") as mock_sub:
+        mock_sub.return_value = MagicMock(returncode=0, stdout=mock_output)
+        resp = client.get("/nodes?source_type=book")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["nodes"]) == 1
+    assert data["nodes"][0]["slug"] == "captures/book/def"
+    assert data["nodes"][0]["source_type"] == "book"
 
 
 def test_get_nodes_empty_brain(client):
@@ -134,6 +152,30 @@ def test_get_nodes_pagination(client):
     data = resp.json()
     assert len(data["nodes"]) == 2
     assert data["nodes"][0]["slug"] == "captures/note/002"
+
+
+def test_get_node_detail_success(client):
+    mock_node = {
+        "slug": "captures/book/abc12345",
+        "source_type": "book",
+        "source_title": "Zero to One",
+        "source_author": "Peter Thiel",
+        "raw_content": "Competition is for losers.",
+        "insight": "Monopoly beats competition.",
+    }
+    with patch("app.main.get_node", return_value=mock_node):
+        resp = client.get("/nodes/captures/book/abc12345")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["node"]["raw_content"] == "Competition is for losers."
+    assert data["node"]["source_author"] == "Peter Thiel"
+
+
+def test_get_node_detail_not_found(client):
+    with patch("app.main.get_node", return_value=None):
+        resp = client.get("/nodes/captures/book/missing")
+    assert resp.status_code == 404
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────

@@ -45,6 +45,10 @@ def _parse_page(text: str, slug: str) -> dict:
         "raw_content": body,
         "insight": fm.get("insight"),
         "principle": fm.get("principle"),
+        "applicable_domains": fm.get("applicable_domains") or [],
+        "open_questions": fm.get("open_questions") or [],
+        "tags": fm.get("tags") or [],
+        "captured_at": fm.get("captured_at"),
     }
 
 

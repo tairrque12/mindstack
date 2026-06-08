@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from app.auth import require_api_key
 from app.services.capture import ocr_image
 from app.services.ingest import ingest_node
+from app.services.nodes import get_node
 from app.services.query import query_brain
 from app.services.utils import SourceType
 
@@ -28,13 +29,16 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if not os.getenv("API_KEY", "").strip():
-        logger.warning("API_KEY environment variable not set or empty — all routes will return 403")
+        logger.warning("API_KEY not set — API auth disabled (local dev only)")
     yield
 
 
 app = FastAPI(title="MindStack", lifespan=lifespan)
 
-_CORS_ORIGINS = os.getenv("CORS_ORIGINS", "https://mindstack.netlify.app").split(",")
+_CORS_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "https://mindstack.netlify.app,http://localhost:5173,http://127.0.0.1:5173",
+).split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_CORS_ORIGINS,
@@ -72,7 +76,13 @@ def capture_text(body: CaptureRequest, _: None = Depends(require_api_key)):
         source_url=body.source_url,
         extra_metadata=body.extra_metadata,
     )
-    return {"slug": result["slug"], "source_type": result["source_type"], "message": "Captured."}
+    return {
+        "slug": result["slug"],
+        "source_type": result["source_type"],
+        "title": result.get("title"),
+        "insight": result.get("insight"),
+        "message": "Captured.",
+    }
 
 
 @app.post("/capture/image")
@@ -103,6 +113,8 @@ async def capture_image(
     return {
         "slug": result["slug"],
         "source_type": result["source_type"],
+        "title": result.get("title"),
+        "insight": result.get("insight"),
         "message": "Captured.",
         "extracted_text": extracted_text,
     }
@@ -126,6 +138,13 @@ async def apply(body: ApplyRequest, _: None = Depends(require_api_key)):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
+def _source_type_from_slug(slug: str) -> str:
+    parts = slug.split("/")
+    if len(parts) >= 3 and parts[0] == "captures":
+        return parts[1]
+    return "note"
+
+
 @app.get("/nodes")
 def get_nodes(
     limit: int = Query(20, ge=1, le=100),
@@ -136,9 +155,9 @@ def get_nodes(
     valid_source_types = {s.value for s in SourceType}
     if source_type and source_type not in valid_source_types:
         raise HTTPException(status_code=400, detail=f"Invalid source_type — must be one of: {', '.join(sorted(valid_source_types))}")
-    cmd = ["gbrain", "list", "--limit", str(min(offset + limit, 100))]
-    if source_type:
-        cmd += ["--type", source_type]
+
+    fetch_limit = 100 if source_type else min(offset + limit, 100)
+    cmd = ["gbrain", "list", "--limit", str(fetch_limit)]
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
@@ -149,14 +168,27 @@ def get_nodes(
         and result.stdout.strip() != "No pages found."
     ):
         lines = [line for line in result.stdout.strip().splitlines() if line.strip()]
-        for line in lines[offset:offset + limit]:
+        for line in lines:
             parts = line.split("\t")
             if len(parts) >= 4:
+                slug = parts[0]
+                st = _source_type_from_slug(slug)
+                if source_type and st != source_type:
+                    continue
                 nodes.append({
-                    "slug": parts[0],
+                    "slug": slug,
                     "type": parts[1],
+                    "source_type": st,
                     "updated_at": parts[2],
                     "title": parts[3],
                 })
 
-    return {"nodes": nodes, "limit": limit, "offset": offset}
+    return {"nodes": nodes[offset:offset + limit], "limit": limit, "offset": offset}
+
+
+@app.get("/nodes/{slug:path}")
+def get_node_detail(slug: str, _: None = Depends(require_api_key)):
+    node = get_node(slug)
+    if not node:
+        raise HTTPException(status_code=404, detail="Node not found.")
+    return {"node": node}

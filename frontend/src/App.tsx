@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Home from './screens/Home'
 import Capture from './screens/Capture'
@@ -31,6 +31,24 @@ function OfflineIndicator() {
   )
 }
 
+function AnimatedRoutes() {
+  const location = useLocation()
+  return (
+    <div
+      key={location.pathname}
+      style={{ height: '100dvh', animation: 'pageFade 0.2s ease' }}
+    >
+      <Routes location={location}>
+        <Route path="/" element={<Home />} />
+        <Route path="/add" element={<Capture />} />
+        <Route path="/brain" element={<Library />} />
+        <Route path="/library" element={<Navigate to="/brain" replace />} />
+        <Route path="/map" element={<Home />} />
+      </Routes>
+    </div>
+  )
+}
+
 export default function App() {
   const { message, clear } = useToastController()
 
@@ -38,12 +56,7 @@ export default function App() {
     <BrowserRouter>
       <div style={{ height: '100dvh', background: '#080808', overflow: 'hidden' }}>
         <OfflineIndicator />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add" element={<Capture />} />
-          <Route path="/brain" element={<Library />} />
-          <Route path="/map" element={<Home />} />
-        </Routes>
+        <AnimatedRoutes />
         {message && <Toast message={message} onDone={clear} />}
       </div>
     </BrowserRouter>
